@@ -19,12 +19,9 @@ class Strings implements StringsInterface
      */
     public function mirrorMultibyteString(string $input): string
     {
-        $array = explode(' ', $input);
-        foreach ($array as $key => $item) {
-            preg_match_all('/./us', $item, $ar);
-            $array[$key] = implode(array_reverse($ar[0]));
-        }
-        return implode(' ', $array);
+        return implode(' ', array_map(function ($item) {
+            return implode('', array_reverse(preg_split('//u', $item)));
+        }, preg_split('/\s+/', $input)));
     }
 
     /**
@@ -33,9 +30,8 @@ class Strings implements StringsInterface
      */
     public function getBrandName(string $noun): string
     {
-        if ($noun[0] === substr($noun, -1)) {
-            return ucfirst($noun) . substr($noun, 1);
-        }
-        return 'The ' . ucfirst($noun);
+        return ($noun[0] === $noun[strlen($noun) - 1])
+            ? ucfirst($noun) . substr($noun, 1)
+            : 'The ' . ucfirst($noun);
     }
 }
