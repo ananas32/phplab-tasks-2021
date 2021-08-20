@@ -25,13 +25,8 @@ class Arrays implements ArraysInterface
      */
     public function getUniqueValue(array $input): int
     {
-        $array = array_filter(array_count_values($input), function ($value) {
-            return $value === 1;
-        });
-
-        ksort($array);
-
-        return array_key_first($array) ?? 0;
+        $unique = array_diff($input, array_diff_key($input, array_unique($input)));
+        return $unique ? min($unique) : 0;
     }
 
     /**
@@ -41,26 +36,14 @@ class Arrays implements ArraysInterface
     public function groupByTag(array $input): array
     {
         $arrTags = [];
-        array_walk_recursive($input, function ($item, $key) use (&$arrTags) {
-            if (is_numeric($key)) {
-                array_push($arrTags, $item);
+        sort($input);
+        foreach ($input as $item) {
+            foreach ($item['tags'] as $tag) {
+                $arrTags[$tag][] = $item['name'];
             }
-        });
-
-        $arrTags = array_unique($arrTags);
-        sort($arrTags);
-        $arrTags = array_flip($arrTags);
-
-        foreach ($arrTags as $key => $tag) {
-            $list = [];
-            foreach ($input as $array) {
-                if (in_array($key, $array['tags'])) {
-                    array_push($list, $array['name']);
-                }
-            }
-            $arrTags[$key] = $list;
-            sort($arrTags[$key]);
         }
+
+        ksort($arrTags);
 
         return $arrTags;
     }
