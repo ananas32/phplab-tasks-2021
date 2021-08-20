@@ -40,11 +40,7 @@ class Basics implements BasicsInterface
     {
         $this->validator->isYearException($year);
 
-        if ((($year % 4) === 0) && (($year % 100) !== 0) || (($year % 400) === 0)) {
-            return true;
-        }
-
-        return false;
+        return (($year % 4) === 0) && (($year % 100) !== 0) || (($year % 400) === 0);
     }
 
     /**
@@ -56,19 +52,8 @@ class Basics implements BasicsInterface
     {
         $this->validator->isValidStringException($input);
 
-        $stringLength = strlen($input);
-        $sum1 = 0;
-        $sum2 = 0;
+        $array = str_split($input, 3);
 
-        for ($i = 0, $j = $stringLength - 1; $i < $stringLength / 2; $i++, $j--) {
-            $sum1 += (int)$input[$i];
-            $sum2 += (int)$input[$j];
-        }
-
-        if ($sum1 === $sum2) {
-            return true;
-        }
-
-        return false;
+        return array_sum(str_split($array[0])) === array_sum(str_split($array[1]));
     }
 }

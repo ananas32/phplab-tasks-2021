@@ -2,8 +2,6 @@
 
 namespace basics;
 
-use InvalidArgumentException;
-
 class BasicsValidator implements BasicsValidatorInterface
 {
     /**
@@ -13,7 +11,7 @@ class BasicsValidator implements BasicsValidatorInterface
     public function isMinutesException(int $minute): void
     {
         if ($minute < 0 || $minute > 60) {
-            throw new InvalidArgumentException($minute . ' is negative of greater then 60');
+            throw new \InvalidArgumentException($minute . ' is negative of greater then 60');
         }
     }
 
@@ -24,7 +22,7 @@ class BasicsValidator implements BasicsValidatorInterface
     public function isYearException(int $year): void
     {
         if ($year < 1900) {
-            throw new InvalidArgumentException($year . ' is lower then 1900');
+            throw new \InvalidArgumentException($year . ' is lower then 1900');
         }
     }
 
@@ -35,7 +33,7 @@ class BasicsValidator implements BasicsValidatorInterface
     public function isValidStringException(string $input): void
     {
         if (strlen($input) != 6) {
-            throw new InvalidArgumentException($input . ' contains more then 6 digits.');
+            throw new \InvalidArgumentException($input . ' contains more then 6 digits.');
         }
     }
 }
