@@ -9,6 +9,19 @@ $airports = require './airports.php';
  * and apply filtering by First Airport Name Letter and/or Airport State
  * (see Filtering tasks 1 and 2 below)
  */
+$filter_by_first_letter = $_GET['filter_by_first_letter'];
+if ($filter_by_first_letter) {
+    $airports = array_filter($airports, function ($item) use ($filter_by_first_letter) {
+        return $item['name'][0] == $filter_by_first_letter;
+    });
+}
+
+$filter_by_state = $_GET['filter_by_state'];
+if ($filter_by_state) {
+    $airports = array_filter($airports, function ($item) use ($filter_by_state) {
+        return $item['state'] == $filter_by_state;
+    });
+}
 
 // Sorting
 /**
@@ -16,6 +29,14 @@ $airports = require './airports.php';
  * and apply sorting
  * (see Sorting task below)
  */
+$sortedFields = ['name', 'code', 'state', 'city'];
+$sortBy = $_GET['sort'];
+if (in_array($sortBy, $sortedFields)) {
+    usort($airports, function ($a, $b) use ($sortBy) {
+        return $a[$sortBy] <=> $b[$sortBy];
+    });
+}
+
 
 // Pagination
 /**
@@ -23,6 +44,18 @@ $airports = require './airports.php';
  * and apply pagination logic
  * (see Pagination task below)
  */
+$per_page = 5;
+$offset = $_GET['page'] ? ($_GET['page'] * 5) - 1 : 0;
+$count_pages = count($airports) / $per_page;
+if (count($airports) % $per_page === 0) {
+    $count_pages++;
+}
+$airports = array_slice($airports, $offset, $per_page);
+$page = $_GET['page'] ?? 1;
+$i_min = max(1, $page - 3);
+$i_max = min($i_min + 6, $count_pages);
+$i_min = max(1, $i_max - 6);
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -32,7 +65,8 @@ $airports = require './airports.php';
     <meta name="description" content="">
     <title>Airports</title>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 </head>
 <body>
 <main role="main" class="container">
@@ -49,14 +83,16 @@ $airports = require './airports.php';
          - when you apply filter_by_first_letter, than filter_by_state (see Filtering task #2) is not reset
            i.e. if you have filter_by_state set you can additionally use filter_by_first_letter
     -->
+
+
     <div class="alert alert-dark">
         Filter by first letter:
 
         <?php foreach (getUniqueFirstLetters(require './airports.php') as $letter): ?>
-            <a href="#"><?= $letter ?></a>
+            <a href="<?= url(false, $letter, $_GET['filter_by_state'], $_GET['sort']) ?>"><?= $letter ?></a>
         <?php endforeach; ?>
 
-        <a href="/" class="float-right">Reset all filters</a>
+        <a href="/src/web" class="float-right">Reset all filters</a>
     </div>
 
     <!--
@@ -72,10 +108,18 @@ $airports = require './airports.php';
     <table class="table">
         <thead>
         <tr>
-            <th scope="col"><a href="#">Name</a></th>
-            <th scope="col"><a href="#">Code</a></th>
-            <th scope="col"><a href="#">State</a></th>
-            <th scope="col"><a href="#">City</a></th>
+            <th scope="col">
+                <a href="<?= sortByUrl('name') ?>">Name</a>
+            </th>
+            <th scope="col">
+                <a href="<?= sortByUrl('code') ?>">Code</a>
+            </th>
+            <th scope="col">
+                <a href="<?= sortByUrl('state') ?>">State</a>
+            </th>
+            <th scope="col">
+                <a href="<?= sortByUrl('city') ?>">City</a>
+            </th>
             <th scope="col">Address</th>
             <th scope="col">Timezone</th>
         </tr>
@@ -92,14 +136,16 @@ $airports = require './airports.php';
                i.e. if you have filter_by_first_letter set you can additionally use filter_by_state
         -->
         <?php foreach ($airports as $airport): ?>
-        <tr>
-            <td><?= $airport['name'] ?></td>
-            <td><?= $airport['code'] ?></td>
-            <td><a href="#"><?= $airport['state'] ?></a></td>
-            <td><?= $airport['city'] ?></td>
-            <td><?= $airport['address'] ?></td>
-            <td><?= $airport['timezone'] ?></td>
-        </tr>
+            <tr>
+                <td><?= $airport['name'] ?></td>
+                <td><?= $airport['code'] ?></td>
+                <td>
+                    <a href="<?= url($_GET['page'], $_GET['filter_by_first_letter'], $airport['state'], $_GET['sort']) ?>"><?= $airport['state'] ?></a>
+                </td>
+                <td><?= $airport['city'] ?></td>
+                <td><?= $airport['address'] ?></td>
+                <td><?= $airport['timezone'] ?></td>
+            </tr>
         <?php endforeach; ?>
         </tbody>
     </table>
@@ -115,9 +161,14 @@ $airports = require './airports.php';
     -->
     <nav aria-label="Navigation">
         <ul class="pagination justify-content-center">
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <?php for ($i = $i_min; $i <= $i_max; $i++) { ?>
+                <li class="page-item <?= activePage($i) ?> <?= $i ?>">
+                    <a class="page-link"
+                       href="<?= url($i, $_GET['filter_by_first_letter'], $_GET['filter_by_state'], $_GET['sort']) ?>">
+                        <?= $i ?>
+                    </a>
+                </li>
+            <?php } ?>
         </ul>
     </nav>
 
