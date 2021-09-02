@@ -9,11 +9,10 @@
  * @param array $airports
  * @return string[]
  */
-function getUniqueFirstLetters(array $airports)
+function getUniqueFirstLetters(array $airports): array
 {
-
     $firstLetters = array_unique(array_map(function ($item) {
-        return $item['name']{0};
+        return $item['name'][0];
     }, $airports));
 
     sort($firstLetters);
@@ -21,38 +20,11 @@ function getUniqueFirstLetters(array $airports)
     return $firstLetters;
 }
 
-function url($page, $filter_by_first_letter, $filter_by_state, $sort)
+function url(array $array): string
 {
-    $string = '?';
-
-    if ($page && $page !== false) {
-        $string .= '&page=' . $page;
+    if (!isset($array['page'])) {
+        $array['page'] = 1;
     }
 
-    if ($filter_by_first_letter) {
-        $string .= "&filter_by_first_letter={$filter_by_first_letter}";
-    }
-
-    if ($filter_by_state) {
-        $string .= "&filter_by_state={$filter_by_state}";
-    }
-
-    if ($sort) {
-        $string .= "&sort={$sort}";
-    }
-
-    return $string;
-}
-
-function sortByUrl($input)
-{
-    return url($_GET['page'], $_GET['filter_by_first_letter'], $_GET['filter_by_state'], $input);
-}
-
-function activePage($page)
-{
-    if ($_GET['page'] == $page || (empty($_GET['page']) && $page === 1)) {
-        return ' active';
-    }
-    return '';
+    return '?' . http_build_query(array_merge($_GET, $array));
 }

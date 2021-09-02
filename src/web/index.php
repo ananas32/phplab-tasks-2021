@@ -2,7 +2,6 @@
 require_once './functions.php';
 
 $airports = require './airports.php';
-
 // Filtering
 /**
  * Here you need to check $_GET request if it has any filtering
@@ -29,15 +28,12 @@ if ($filter_by_state) {
  * and apply sorting
  * (see Sorting task below)
  */
-$sortedFields = ['name', 'code', 'state', 'city'];
 $sortBy = $_GET['sort'];
-if (in_array($sortBy, $sortedFields)) {
+if (!empty($sortBy)) {
     usort($airports, function ($a, $b) use ($sortBy) {
         return $a[$sortBy] <=> $b[$sortBy];
     });
 }
-
-
 // Pagination
 /**
  * Here you need to check $_GET request if it has pagination key
@@ -45,17 +41,13 @@ if (in_array($sortBy, $sortedFields)) {
  * (see Pagination task below)
  */
 $per_page = 5;
-$offset = $_GET['page'] ? ($_GET['page'] * 5) - 1 : 0;
-$count_pages = count($airports) / $per_page;
-if (count($airports) % $per_page === 0) {
-    $count_pages++;
-}
-$airports = array_slice($airports, $offset, $per_page);
-$page = $_GET['page'] ?? 1;
-$i_min = max(1, $page - 3);
-$i_max = min($i_min + 6, $count_pages);
-$i_min = max(1, $i_max - 6);
 
+$pagination = [
+    'currentPage' => $_GET['page'] ?? 1,
+    'pagesCount' => (int)ceil(count($airports) / $per_page),
+];
+
+$airports = array_chunk($airports, $per_page)[$pagination['currentPage'] - 1];
 ?>
 <!doctype html>
 <html lang="en">
@@ -89,10 +81,10 @@ $i_min = max(1, $i_max - 6);
         Filter by first letter:
 
         <?php foreach (getUniqueFirstLetters(require './airports.php') as $letter): ?>
-            <a href="<?= url(false, $letter, $_GET['filter_by_state'], $_GET['sort']) ?>"><?= $letter ?></a>
+            <a href="<?= url(['filter_by_first_letter' => $letter]) ?>"><?= $letter ?></a>
         <?php endforeach; ?>
 
-        <a href="/src/web" class="float-right">Reset all filters</a>
+        <a href="/" class="float-right">Reset all filters</a>
     </div>
 
     <!--
@@ -109,16 +101,16 @@ $i_min = max(1, $i_max - 6);
         <thead>
         <tr>
             <th scope="col">
-                <a href="<?= sortByUrl('name') ?>">Name</a>
+                <a href="<?= url(['sort' => 'name']) ?>">Name</a>
             </th>
             <th scope="col">
-                <a href="<?= sortByUrl('code') ?>">Code</a>
+                <a href="<?= url(['sort' => 'code']) ?>">Code</a>
             </th>
             <th scope="col">
-                <a href="<?= sortByUrl('state') ?>">State</a>
+                <a href="<?= url(['sort' => 'state']) ?>">State</a>
             </th>
             <th scope="col">
-                <a href="<?= sortByUrl('city') ?>">City</a>
+                <a href="<?= url(['sort' => 'city']) ?>">City</a>
             </th>
             <th scope="col">Address</th>
             <th scope="col">Timezone</th>
@@ -140,7 +132,7 @@ $i_min = max(1, $i_max - 6);
                 <td><?= $airport['name'] ?></td>
                 <td><?= $airport['code'] ?></td>
                 <td>
-                    <a href="<?= url($_GET['page'], $_GET['filter_by_first_letter'], $airport['state'], $_GET['sort']) ?>"><?= $airport['state'] ?></a>
+                    <a href="<?= url(['filter_by_state' => $airport['state']]) ?>"><?= $airport['state'] ?></a>
                 </td>
                 <td><?= $airport['city'] ?></td>
                 <td><?= $airport['address'] ?></td>
@@ -161,14 +153,31 @@ $i_min = max(1, $i_max - 6);
     -->
     <nav aria-label="Navigation">
         <ul class="pagination justify-content-center">
-            <?php for ($i = $i_min; $i <= $i_max; $i++) { ?>
-                <li class="page-item <?= activePage($i) ?> <?= $i ?>">
-                    <a class="page-link"
-                       href="<?= url($i, $_GET['filter_by_first_letter'], $_GET['filter_by_state'], $_GET['sort']) ?>">
-                        <?= $i ?>
-                    </a>
-                </li>
-            <?php } ?>
+            <?php for ($i = 1; $i <= $pagination['pagesCount']; $i++): ?>
+                <?php if ($pagination['currentPage'] > 4 && $i === 2): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                <? endif; ?>
+                <?php if ($i == $pagination['currentPage']): ?>
+                    <li class="page-item active">
+                        <span class="page-link"><?= $i ?></span>
+                    </li>
+                <?php elseif (
+                    $i == $pagination['currentPage'] + 1
+                    || $i == $pagination['currentPage'] + 2
+                    || $i == $pagination['currentPage'] - 1
+                    || $i == $pagination['currentPage'] - 2
+                    || $i == $pagination['pagesCount']
+                    || $i == 1
+                ): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="<?= url(['page' => $i]) ?>"><?= $i ?></a>
+                    </li>
+                <?php endif; ?>
+
+                <?php if ($pagination['currentPage'] < $pagination['pagesCount'] - 3 && $i === $pagination['pagesCount'] - 1): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                <? endif; ?>
+            <?php endfor; ?>
         </ul>
     </nav>
 
