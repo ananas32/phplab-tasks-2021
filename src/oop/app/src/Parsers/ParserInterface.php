@@ -25,5 +25,5 @@ interface ParserInterface
      * @param string $siteContent
      * @return mixed
      */
-    public function parseContent(string $siteContent);
+    public function parseContent(string $siteContent): array;
 }

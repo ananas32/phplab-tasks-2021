@@ -10,6 +10,8 @@
 
 namespace src\oop\app\src;
 
+use src\oop\app\src\Models\Movie;
+
 class Scrapper
 {
     public $transporter;
@@ -23,6 +25,8 @@ class Scrapper
 
     public function getMovie($url)
     {
-        return $this->parser->parseContent($this->transporter->getContent($url));
+        extract($this->parser->parseContent($this->transporter->getContent($url)));
+
+        return new Movie($title, $description, $poster);
     }
 }
