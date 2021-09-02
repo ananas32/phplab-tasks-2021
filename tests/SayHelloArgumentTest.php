@@ -21,7 +21,7 @@ class SayHelloArgumentTest extends TestCase
         $this->assertEquals($expected, $this->functions->sayHelloArgument($input));
     }
 
-    public function positiveDataProvider()
+    public function positiveDataProvider(): array
     {
         return [
             [696969, 'Hello 696969'],

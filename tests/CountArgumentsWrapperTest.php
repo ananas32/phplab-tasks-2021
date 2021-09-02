@@ -22,7 +22,7 @@ class CountArgumentsWrapperTest extends TestCase
         $this->functions->countArgumentsWrapper(...$input);
     }
 
-    public function negativeDataProvider()
+    public function negativeDataProvider(): array
     {
         return [
             [

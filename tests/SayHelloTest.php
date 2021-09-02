@@ -20,7 +20,7 @@ class SayHelloTest extends TestCase
         $this->assertEquals($expected, $this->functions->sayHello());
     }
 
-    public function positiveDataProvider()
+    public function positiveDataProvider(): array
     {
         return [
             ['Hello']

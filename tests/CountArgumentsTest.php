@@ -21,7 +21,7 @@ class CountArgumentsTest extends TestCase
         $this->assertEquals($expected, $this->functions->countArguments(...$input));
     }
 
-    public function positiveDataProvider()
+    public function positiveDataProvider(): array
     {
         return [
             [
