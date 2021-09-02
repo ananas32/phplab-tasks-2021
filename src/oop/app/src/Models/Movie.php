@@ -10,9 +10,9 @@ class Movie implements MovieInterface
 
     public function __construct($title, $description, $poster)
     {
-        $this->title = $title;
-        $this->description = $description;
-        $this->poster = $poster;
+        $this->setTitle($title);
+        $this->setDescription($description);
+        $this->setPoster($poster);
     }
 
     /**
