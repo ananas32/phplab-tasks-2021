@@ -25,8 +25,16 @@ class Scrapper
 
     public function getMovie($url)
     {
-        extract($this->parser->parseContent($this->transporter->getContent($url)));
+        return $this->createMovie($this->parser->parseContent($this->transporter->getContent($url)));
+    }
 
-        return new Movie($title, $description, $poster);
+    public function createMovie(array $assocArrayMovie)
+    {
+        extract($assocArrayMovie);
+        $movie = new Movie();
+        $movie->setTitle($title);
+        $movie->setDescription($description);
+        $movie->setPoster($poster);
+        return $movie;
     }
 }
