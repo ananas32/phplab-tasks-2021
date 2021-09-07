@@ -42,12 +42,9 @@ if (!empty($sortBy)) {
  */
 $per_page = 5;
 
-$pagination = [
-    'currentPage' => $_GET['page'] ?? 1,
-    'pagesCount' => (int)ceil(count($airports) / $per_page),
-];
-
-$airports = array_chunk($airports, $per_page)[$pagination['currentPage'] - 1];
+$currentPage = $_GET['page'] ?? 1;
+$pagesCount = (int)ceil(count($airports) / $per_page);
+$airports = array_chunk($airports, $per_page)[$currentPage - 1];
 ?>
 <!doctype html>
 <html lang="en">
@@ -153,20 +150,20 @@ $airports = array_chunk($airports, $per_page)[$pagination['currentPage'] - 1];
     -->
     <nav aria-label="Navigation">
         <ul class="pagination justify-content-center">
-            <?php for ($i = 1; $i <= $pagination['pagesCount']; $i++): ?>
-                <?php if ($pagination['currentPage'] > 4 && $i === 2): ?>
+            <?php for ($i = 1; $i <= $pagesCount; $i++): ?>
+                <?php if ($currentPage > 4 && $i === 2): ?>
                     <li class="page-item disabled"><span class="page-link">...</span></li>
-                <? endif; ?>
-                <?php if ($i == $pagination['currentPage']): ?>
+                <?php endif; ?>
+                <?php if ($i == $currentPage): ?>
                     <li class="page-item active">
                         <span class="page-link"><?= $i ?></span>
                     </li>
                 <?php elseif (
-                    $i == $pagination['currentPage'] + 1
-                    || $i == $pagination['currentPage'] + 2
-                    || $i == $pagination['currentPage'] - 1
-                    || $i == $pagination['currentPage'] - 2
-                    || $i == $pagination['pagesCount']
+                    $i == $currentPage + 1
+                    || $i == $currentPage + 2
+                    || $i == $currentPage - 1
+                    || $i == $currentPage - 2
+                    || $i == $pagesCount
                     || $i == 1
                 ): ?>
                     <li class="page-item">
@@ -174,9 +171,9 @@ $airports = array_chunk($airports, $per_page)[$pagination['currentPage'] - 1];
                     </li>
                 <?php endif; ?>
 
-                <?php if ($pagination['currentPage'] < $pagination['pagesCount'] - 3 && $i === $pagination['pagesCount'] - 1): ?>
+                <?php if ($currentPage < $pagesCount - 3 && $i === $pagesCount - 1): ?>
                     <li class="page-item disabled"><span class="page-link">...</span></li>
-                <? endif; ?>
+                <?php endif; ?>
             <?php endfor; ?>
         </ul>
     </nav>
