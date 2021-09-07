@@ -11,10 +11,24 @@ class SayHelloArgumentWrapperTest extends TestCase
         $this->functions = new functions\Functions();
     }
 
-    public function testNegative()
+    /**
+     * @dataProvider negativeDataProvider
+     */
+    public function testNegative($unexpectedValue): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $this->functions->sayHelloArgumentWrapper([]);
+        $this->functions->sayHelloArgumentWrapper($unexpectedValue);
+    }
+
+    /**
+     * Use params not equal number, string or bool
+     */
+    public function negativeDataProvider(): array
+    {
+        return [
+            [ null ],
+            [ ['array'] ],
+        ];
     }
 }
