@@ -31,10 +31,7 @@ function import($pdo, $item, $table, $key)
 }
 
 foreach (require_once('../web/airports.php') as $item) {
-    // Cities
     $cityId = import($pdo, $item, 'cities', 'city');
-
-    // States
     $stateId = import($pdo, $item, 'states', 'state');
 
     // Airports
