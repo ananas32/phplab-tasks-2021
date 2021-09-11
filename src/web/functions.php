@@ -22,9 +22,5 @@ function getUniqueFirstLetters(array $airports): array
 
 function url(array $array): string
 {
-    if (!isset($array['page'])) {
-        $array['page'] = 1;
-    }
-
     return '?' . http_build_query(array_merge($_GET, $array));
 }
