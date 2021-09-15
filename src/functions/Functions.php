@@ -51,15 +51,16 @@ class Functions
      * Create a PhpUnit test (SayHelloArgumentWrapperTest) which will check this behavior
      * !!! you need to test only exceptional case, since the behavior of sayHelloArgument was already tested in the task above
      *
-     * @param $arg
+     * @param $arguments
      * @return string
      * @throws \InvalidArgumentException
      */
-    public function sayHelloArgumentWrapper($arg): string
+    public function sayHelloArgumentWrapper($arguments): string
     {
-        // put your code here
-
-        return $this->sayHelloArgument($arg);
+        if (is_numeric($arguments) || is_string($arguments) || is_bool($arguments)) {
+            return $this->sayHelloArgument($arguments);
+        }
+        throw new \InvalidArgumentException('Not valid argument. Try use arg. type: number, string or bool');
     }
 
     /**
@@ -91,6 +92,13 @@ class Functions
      */
     public function countArgumentsWrapper(): array
     {
-        // put your code here
+        $arguments = func_get_args();
+        foreach ($arguments as $item) {
+            if (!is_string($item)) {
+                throw new \InvalidArgumentException('String are allowed only, bro!');
+            }
+        }
+
+        return $this->countArguments($arguments);
     }
 }
