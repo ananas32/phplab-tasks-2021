@@ -9,27 +9,39 @@
 /** @var \PDO $pdo */
 require_once './pdo_ini.php';
 
-foreach (require_once('../web/airports.php') as $item) {
-    // Cities
-    // To check if city with this name exists in the DB we need to SELECT it first
-    $sth = $pdo->prepare('SELECT id FROM cities WHERE name = :name');
+function import($pdo, $item, $table, $key)
+{
+    // To check if item with this name exists in the DB we need to SELECT it first
+    $sth = $pdo->prepare('SELECT id FROM ' . $table . ' WHERE name = :name');
     $sth->setFetchMode(\PDO::FETCH_ASSOC);
-    $sth->execute(['name' => $item['city']]);
-    $city = $sth->fetch();
+    $sth->execute(['name' => $item[$key]]);
+    $row = $sth->fetch();
 
-    // If result is empty - we need to INSERT city
-    if (!$city) {
-        $sth = $pdo->prepare('INSERT INTO cities (name) VALUES (:name)');
-        $sth->execute(['name' => $item['city']]);
+    // If result is empty - we need to INSERT
+    if (!$row) {
+        $sth = $pdo->prepare('INSERT INTO ' . $table . ' (name) VALUES (:name)');
+        $sth->execute(['name' => $item[$key]]);
 
         // We will use this variable to INSERT airport
-        $cityId = $pdo->lastInsertId();
-    } else {
-        // We will use this variable to INSERT airport
-        $cityId = $city['id'];
+        return $pdo->lastInsertId();
     }
 
-    // TODO States
+    // We will use this variable to INSERT airport
+    return $row['id'];
+}
 
-    // TODO Airports
+foreach (require_once('../web/airports.php') as $item) {
+    $cityId = import($pdo, $item, 'cities', 'city');
+    $stateId = import($pdo, $item, 'states', 'state');
+
+    // Airports
+    $sth = $pdo->prepare('INSERT INTO airports (name, code, address, timezone, city_id, state_id) VALUES (:name, :code, :address, :timezone, :city_id, :state_id)');
+    $sth->execute([
+        'name' => $item['name'],
+        'code' => $item['code'],
+        'address' => $item['address'],
+        'timezone' => $item['timezone'],
+        'city_id' => $cityId,
+        'state_id' => $stateId
+    ]);
 }
